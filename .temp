@@ -1,0 +1,555 @@
+Scheduling
+
+class Process:
+    def __init__(self, pid, burst_time, arrival_time, priority=0):
+        self.pid = pid
+        self.burst_time = burst_time
+        self.remaining_time = burst_time
+        self.arrival_time = arrival_time
+        self.priority = priority
+        self.completion_time = 0
+
+def fcfs(processes):
+    processes.sort(key=lambda x: x.arrival_time)
+    time = 0
+    for process in processes:
+        if time < process.arrival_time:
+            time = process.arrival_time
+        time += process.burst_time
+        process.completion_time = time
+    return processes
+
+def sjf_preemptive(processes):
+    time = 0
+    completed = 0
+    n = len(processes)
+    processes.sort(key=lambda x: x.arrival_time)
+    while completed < n:
+        ready_queue = [p for p in processes if p.arrival_time <= time and p.remaining_time > 0]
+        if ready_queue:
+            current_process = min(ready_queue, key=lambda x: x.remaining_time)
+            current_process.remaining_time -= 1
+            time += 1
+            if current_process.remaining_time == 0:
+                current_process.completion_time = time
+                completed += 1
+        else:
+            time += 1
+    return processes
+
+def priority_non_preemptive(processes):
+    processes.sort(key=lambda x: (x.arrival_time, x.priority))
+    time = 0
+    completed = 0
+    n = len(processes)
+
+    while completed < n:
+        ready_queue = [p for p in processes if p.arrival_time <= time and p.burst_time > 0]
+        if ready_queue:
+            current_process = min(ready_queue, key=lambda x: x.priority)
+            time += current_process.burst_time
+            current_process.completion_time = time
+            current_process.burst_time = 0
+            completed += 1
+        else:
+            time += 1
+    return processes
+
+def round_robin(processes, time_quantum):
+    queue = []
+    time = 0
+    completed = 0
+    n = len(processes)
+    
+    processes.sort(key=lambda x: x.arrival_time)
+    while completed < n:
+        for process in processes:
+            if process.arrival_time <= time and process.remaining_time > 0:
+                queue.append(process)
+        
+        if queue:
+            current_process = queue.pop(0)
+            if current_process.remaining_time > time_quantum:
+                time += time_quantum
+                current_process.remaining_time -= time_quantum
+                queue.append(current_process)
+            else:
+                time += current_process.remaining_time
+                current_process.completion_time = time
+                current_process.remaining_time = 0
+                completed += 1
+        else:
+            time += 1
+            
+    return processes
+
+def print_processes(processes):
+    print("PID\tBurst Time\tArrival Time\tCompletion Time")
+    for p in processes:
+        print(f"{p.pid}\t{p.burst_time}\t\t{p.arrival_time}\t\t{p.completion_time}")
+
+if __name__ == "__main__":
+    processes = [
+        Process(pid=1, burst_time=8, arrival_time=0, priority=1),
+        Process(pid=2, burst_time=4, arrival_time=1, priority=2),
+        Process(pid=3, burst_time=9, arrival_time=2, priority=3),
+        Process(pid=4, burst_time=5, arrival_time=3, priority=0),
+    ]
+
+    print("FCFS Scheduling:")
+    fcfs_processes = fcfs(processes.copy())
+    print_processes(fcfs_processes)
+
+    print("\nSJF (Preemptive) Scheduling:")
+    sjf_processes = sjf_preemptive(processes.copy())
+    print_processes(sjf_processes)
+
+    print("\nPriority (Non-Preemptive) Scheduling:")
+    priority_processes = priority_non_preemptive(processes.copy())
+    print_processes(priority_processes)
+
+    print("\nRound Robin Scheduling (Time Quantum = 3):")
+    rr_processes = round_robin(processes.copy(), time_quantum=3)
+    print_processes(rr_processes)
+
+
+/////////////////////////////////////
+/////////////////////////////////////
+/////////////////////////////////////
+
+Best fit Worst Fit
+filesize = []
+blocksize = []
+res = []
+def firstfit():
+	global res
+
+	res = []
+	i = 0
+	j = 0	
+	for i in range(len(filesize)):
+		for j in range(len(blocksize)):
+			if filesize[i] <= blocksize[j] and j not in res:
+				res.append(j)
+			else:
+				res.append(-1);
+				break
+	display("First FIt")
+	
+def bestfit():
+	global res 
+	res = [-1]*len(filesize)
+	i = 0
+	j = 0
+	for i in range(len(filesize)):
+		mini = max(blocksize)
+		for j in range(len(blocksize)):
+			diff = blocksize[j] - filesize[i]
+			if diff >= 0 and diff < mini  and j not in res:
+				print(mini,(blocksize[j] - filesize[i]))
+				mini = abs(blocksize[j] - filesize[i])
+				res[i] = j
+	display("Best Fit")
+	
+def worstfit():
+	global res 
+	res = [-1]*len(filesize)
+	i = 0
+	j = 0
+	for i in range(len(filesize)):
+		mini = 0
+		for j in range(len(blocksize)):
+			diff = blocksize[j] - filesize[i]
+			if diff >= 0 and diff > mini  and j not in res:
+				print(mini,(blocksize[j] - filesize[i]))
+				mini = abs(blocksize[j] - filesize[i])
+				res[i] = j
+	display("Worst Fit")
+	
+def nextfit():
+	global res
+	res = []
+	i = 0
+	j = 0	
+	for i in range(len(filesize)):
+		for j in range(len(blocksize)):
+			if filesize[i] <= blocksize[j] and j not in res:
+				res.append(j)
+			
+				break
+	display("Next Fit")
+		
+	
+def getinput():
+	n1 = int(input("Enter number of blocks: "))
+	n2 = int(input("Enter number of files: "))
+	
+	for n in range(n1):
+		print("Enter Block ",n,": ",end="")
+		inp = int(input())
+		blocksize.append(inp)
+		
+	for n in range(n2):
+		print("Enter File ",n,": ",end="")
+		inp = int(input())
+		filesize.append(inp)
+		
+
+def display(t):
+	 print(t)
+	 print("Block Index","Block Size","File Index","File Size")
+	 for i in range(len(blocksize)):
+	 	if len(res) >= i:
+	 		r = res[i]
+	 	else:
+	 		r = 0
+	 	print(i,blocksize[i],r,filesize[r])
+getinput()
+firstfit()
+bestfit()
+worstfit()
+nextfit()
+
+///////////////////////////////////////
+///////////////////////////////////////
+///////////////////////////////////////
+Paging
+
+
+#include <iostream>
+#include <vector>
+#include <bits/stdc++.h>
+using namespace std;
+
+	int n;
+int noPages;
+	int oldest = 0;
+	int pages[10];
+	int arr[10];
+int updateOldest(){
+
+
+	if (oldest > n){
+
+		oldest = 0;
+}
+else{
+
+oldest++;
+
+}
+}
+
+void display(){
+
+cout<<"\n";
+
+	for(int j = 0; j<n;j++){
+	cout<<arr[j]<<" ";
+ 
+}
+
+}
+int fifo(){
+cout<<"\nFIFO ";
+	for(int j = 0; j<n;j++){
+		
+	if(j<=noPages){
+		arr[j] = pages[j];
+}
+}
+cout<<"\ninitialize: ";
+display();
+bool flag = false;
+	for(int j = n; j<noPages;j++){
+	
+	
+	for(int i = 0; i<n;i++){
+		
+		if(arr[i] == pages[j]){
+		cout<<"\n"<<pages[j]<<" is a Hit";
+		flag = true;
+		break;
+		}
+	
+	}
+if (!flag){
+
+
+		arr[oldest]=pages[j];
+		updateOldest();
+		display();
+
+	
+}
+}
+cout<<"\n";
+}
+
+
+int main(){
+	
+
+	cout<<"Max Length of Allcation: "; 
+	cin>>n;
+	cout<<"\n input Number of Pages: ";
+	cin>>noPages;
+	for(int i = 0; i<noPages;i++){
+
+	cin>>pages[i];
+}
+cout<<"Initial : ";
+display();
+	fifo();
+
+}
+
+///////////////////////////////////////
+///////////////////////////////////////
+///////////////////////////////////////
+
+2 Pass Macro
+
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+// Argument list for macros
+struct ArgumentList {
+    int index;
+    string arg;
+};
+
+// Definition table entry
+struct DefinitionTableEntry {
+    int index;
+    string definition;
+    vector<ArgumentList*> args;  // Arguments associated with this definition
+};
+
+// Macro name table
+struct NameTableEntry {
+    int index;
+    string name;
+    DefinitionTableEntry* dtEntry;  // Pointer to the macro's definition table entry
+};
+
+// Global tables
+vector<DefinitionTableEntry*> definitionTable;
+vector<NameTableEntry> nameTable;
+vector<ArgumentList> argumentList;
+int alIndex = 1;
+
+// Find argument by name
+ArgumentList* findArgument(const string& arg) {
+    for (size_t i = 0; i < argumentList.size(); ++i) {
+        if (argumentList[i].arg == arg) return &argumentList[i];
+    }
+    return NULL;
+}
+
+// Find macro definition entry by name
+DefinitionTableEntry* findDefinitionEntry(const string& name) {
+    for (size_t i = 0; i < nameTable.size(); ++i) {
+        if (nameTable[i].name == name) return nameTable[i].dtEntry;
+    }
+    return NULL;
+}
+
+void pass1(ifstream& file) {
+    string line;
+    while (getline(file, line)) {
+        if (line.find("MACRO") != string::npos) {
+            istringstream iss(line);
+            string token;
+            iss >> token; // MACRO
+            iss >> token; // Macro name
+
+            NameTableEntry ntEntry;
+            ntEntry.index = nameTable.size() + 1;
+            ntEntry.name = token;
+            nameTable.push_back(ntEntry);
+
+            cout << "\nMACRO " << ntEntry.name << " Detected...\n";
+
+            // Process macro arguments
+            while (iss >> token) {
+                if (token != "MACRO") {
+                    ArgumentList* al = findArgument(token);
+                    if (!al) {
+                        ArgumentList newArg;
+                        newArg.index = alIndex++;
+                        newArg.arg = token;
+                        argumentList.push_back(newArg);
+                        al = &argumentList.back();
+                    }
+                }
+            }
+
+            DefinitionTableEntry* dtEntry = new DefinitionTableEntry();
+            dtEntry->index = definitionTable.size() + 1;
+            dtEntry->definition = ntEntry.name;
+            definitionTable.push_back(dtEntry);
+            nameTable.back().dtEntry = dtEntry;
+
+            getline(file, line); // Read next line
+            while (line != "MEND") {
+                istringstream lineStream(line);
+                int index = 0;
+                DefinitionTableEntry* newEntry = new DefinitionTableEntry();
+                newEntry->index = definitionTable.size() + 1;
+
+                while (lineStream >> token) {
+                    if (index == 0) {
+                        newEntry->definition = token;
+                    } else {
+                        ArgumentList* al = findArgument(token);
+                        if (!al) {
+                            ArgumentList newArg;
+                            newArg.index = alIndex++;
+                            newArg.arg = token;
+                            argumentList.push_back(newArg);
+                            al = &argumentList.back();
+                        }
+                        newEntry->args.push_back(al);
+                    }
+                    ++index;
+                }
+                definitionTable.push_back(newEntry);
+                getline(file, line);
+            }
+        }
+    }
+    cout << "\nPass 1 Complete!\n";
+}
+
+void pass2(ifstream& file) {
+    ofstream outFile("output.txt", ios::app);
+    string line;
+
+    while (getline(file, line)) {
+        DefinitionTableEntry* dtEntry = findDefinitionEntry(line);
+        if (dtEntry) {
+            // You need to traverse or handle `dtEntry` properly.
+            // This assumes `dtEntry` points to a valid entry and processes it.
+
+            while (dtEntry && dtEntry->definition != "MEND") {
+                outFile << "-\t" << dtEntry->definition;
+                for (size_t i = 0; i < dtEntry->args.size(); ++i) {
+                    outFile << "\t" << dtEntry->args[i]->arg;
+                }
+                outFile << "\n";
+
+                // Handle the next entry if required. 
+                // You need some mechanism to set `dtEntry` to the next valid entry if applicable.
+                // Here, we assume you have a mechanism to set `dtEntry` to the next entry
+                // For now, we'll just break to avoid an infinite loop.
+                break;
+            }
+        }
+    }
+    cout << "\nOutput file updated. Pass 2 Complete!\n";
+}
+
+int main() {
+    ifstream file("input.asm");
+    if (!file.is_open()) {
+        cerr << "Failed to open the assembly file!";
+        return 1;
+    }
+
+    cout << "\nPass 1 in progress\n";
+    pass1(file);
+
+    file.clear();
+    file.seekg(0); // Rewind file for pass2
+
+    cout << "\nPass 2 in progress\n";
+    pass2(file);
+
+    cout << "DEF TABLE\n";
+    for (size_t i = 0; i < definitionTable.size(); ++i) {
+        cout << definitionTable[i]->definition << " \n";
+    }
+        cout << "\nMNT TABLE\n";
+    for (size_t i = 0; i < nameTable.size(); ++i) {
+        cout << nameTable[i].index << "  "<< nameTable[i].name << " \n";
+    }
+            cout << "ALA TABLE\n";
+    for (size_t i = 0; i < argumentList.size(); ++i) {
+        cout << argumentList[i].index << "  "<< argumentList[i].arg << " \n";
+    }
+
+    file.close();
+    return 0;
+}
+
+Input
+INCR MACRO X
+MOV R 1
+ADD X R
+MEND
+
+.CODE
+MOV AX, 5
+INCR AX
+CLC
+END 
+
+
+Output
+INCR MACRO X
+MOV R 1
+ADD X R
+MEND
+
+.CODE
+MOV AX, 5
+MOV R 1
+ADD AX R
+CLC
+END
+
+
+
+///////////////////////////////////////
+///////////////////////////////////////
+///////////////////////////////////////
+
+DLL
+// HelloWorld.c
+#include <jni.h>
+#include <stdio.h>
+#include "HelloWorld.h"
+
+// Implementation of the native method
+JNIEXPORT void JNICALL Java_HelloWorld_sayHello(JNIEnv *env, jobject obj) {
+    printf("Hello from the native code!\n");
+}
+
+
+
+
+//////
+// HelloWorld.java
+public class HelloWorld {
+    // Load the DLL
+    static {
+        System.loadLibrary("HelloWorld"); // Name of the DLL without "lib" prefix and ".dll" suffix
+    }
+
+    // Declare a native method
+    public native void sayHello();
+
+    // Main method to test the native method
+    public static void main(String[] args) {
+        new HelloWorld().sayHello();
+    }
+}
+
+
