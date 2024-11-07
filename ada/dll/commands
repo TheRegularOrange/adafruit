@@ -1,0 +1,22 @@
+
+
+(base) admin1@413-24:~$ javac B1.java
+(base) admin1@413-24:~$ javah -jni B1
+(base) admin1@413-24:~$ locate jni.h
+/home/admin1/.vscode/extensions/redhat.java-1.32.0-linux-x64/jre/17.0.11-linux-x86_64/include/jni.h
+/home/admin1/.vscode/extensions/redhat.java-1.33.0-linux-x64/jre/17.0.11-linux-x86_64/include/jni.h
+/opt/android-studio/jre/include/jni.h
+/snap/intellij-idea-community/495/jbr/include/jni.h
+/snap/intellij-idea-community/515/jbr/include/jni.h
+/snap/vlc/3721/usr/lib/jvm/java-8-openjdk-amd64/include/jni.h
+/snap/vlc/3777/usr/lib/jvm/java-8-openjdk-amd64/include/jni.h
+/usr/lib/jvm/java-11-openjdk-amd64/include/jni.h
+/usr/lib/jvm/java-8-openjdk-amd64/include/jni.h
+/usr/lib/jvm/java-8-oracle/include/jni.h
+/usr/local/java/jdk1.8.0_181/include/jni.h
+(base) admin1@413-24:~$ gcc -I/usr/lib/jvm/java-8-openjdk-amd64/include -I/usr/lib/jvm/java-8-openjdk-amd64/include/linux -o libB1.so -shared -fPIC B1.c
+(base) admin1@413-24:~$ java "-Djava.library.path=. B1"
+
+
+gcc -I"C:\Program Files\Java\jdk-1.8\include" -I"C:\Program Files\Java\jdk-1.8\include\win32" -o libB1.dll -shared -fPIC B1.c
+gcc -I"C:\Program Files\Java\jre1.8.0_421\include" -I"C:\Program Files\Java\jre1.8.0_421\include\win32" -o B1.dll -shared -fPIC B1.c

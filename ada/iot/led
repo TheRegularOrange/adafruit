@@ -1,0 +1,24 @@
+import RPi.GPIO as GPIO
+import time
+
+# Set up GPIO mode and pins
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(16, GPIO.IN)  # Sensor input
+GPIO.setup(25, GPIO.OUT)  # LED output
+
+try:
+    while True:
+        if GPIO.input(16):  # Object detected
+            GPIO.output(25, 1)  # LED on
+            print("Object Detected")
+        else:
+            GPIO.output(25, 0)  # LED off
+            print("Object not detected")
+        
+        time.sleep(0.1)  # Short delay
+
+except KeyboardInterrupt:
+    print("Exiting program")
+
+finally:
+    GPIO.cleanup()
